@@ -70,7 +70,7 @@ This interactive dashboard provides comprehensive visual analysis of financial m
 """)
 
 # File paths configuration
-data_folder = "C:\\Users\\stebr\\Financial Market\\data"
+data_folder = "path/to/data" # insert your path to "data" folder
 symbols_meta_path = os.path.join(data_folder, "symbols_valid_meta.csv")
 
 # Load metadata

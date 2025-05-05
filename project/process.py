@@ -4,7 +4,7 @@ import glob
 from pathlib import Path
 
 # Path to the main data folder
-folder_path = 'C:\\Users\\stebr\\Financial Market\\data'
+folder_path = 'path/to/data'  # insert your path to "data" folder
 
 # Find all .csv files including subdirectories (recursive search)
 csv_files = glob.glob(os.path.join(folder_path, '**', '*.csv'), recursive=True)
