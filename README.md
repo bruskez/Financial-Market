@@ -1,36 +1,59 @@
-# Explore the Financial Markets
+# Financial Market Analysis Dashboard 📊
 
-The financial world has long been considered a complex reality, accessible only to a chosen few. Nevertheless, it is an integral part of everyday life, and many dynamics that unfold in the surrounding environment originate or develop from financial markets. This project is designed to explore the trends of financial securities listed on NASDAQ without requiring prior knowledge. With the provided guidance, you can intuitively discover the world of financial analysis, even if you are a beginner.
+## Bridging the Gap Between Finance and Everyday Life
 
-## Overview
+The financial world has long been perceived as complex and exclusive, yet it profoundly impacts our daily lives. This project democratizes financial analysis by making NASDAQ market trends accessible to everyone - from curious beginners to experienced investors. Our intuitive interface removes the technical barriers, allowing you to explore market dynamics through clear visualizations and straightforward metrics.
 
-Observe monthly value charts over a decade to understand how assets move. Use the key metrics provided:
+## Key Features 
 
-- Follow Average Returns: See how securities have performed over time. With easily understandable charts, you can quickly assess if your investments are heading in the right direction.
+### Intuitive Market Exploration
+- **Zero prerequisites needed**: Designed for users at all knowledge levels
+- **Decade-long trends**: Observe monthly value charts spanning 10+ years
+- **Comparative analysis**: Side-by-side security comparisons
 
-- Understand Volatility: Volatility may seem complicated, but a clear view of price fluctuations is offered. This information will help you better assess the risk associated with your investments.
+### Core Financial Metrics Made Simple
+| Metric | What It Tells You | Why It Matters |
+|--------|-------------------|----------------|
+| **Average Returns** | Performance over time | Track investment growth |
+| **Volatility** | Price fluctuation levels | Understand risk exposure |
+| **Trading Volume** | Market activity peaks | Spot investor sentiment |
 
-- Observe Trading Volume: Discover when there is more buying or selling activity. This can give you an idea of how other investors are behaving and guide your decisions.
 
-## Dataset
+Here's the revised documentation section reflecting your actual project structure:
 
-The dataset used is available on Kaggle: [link](https://www.kaggle.com/code/jacksoncrow/download-nasdaq-historical-data/notebook). Follow the instructions on the webpage. For this project, the first 3000 securities with a decade-long timeframe were considered.
+## Getting Started 
 
-## Project Structure
+### Data Pipeline
+1. `import.py`: Downloads NASDAQ historical data (first 3000 securities with decade-long history) (**Data Acquisition**)
 
-The project consists of the following main files and folders:
+2. `process.py`: Cleans and prepares raw data for analysis (**Data Processing**)
 
-- 'Data': The folder contains the dataset divided into two tables, 'etfs' and 'stocks'.
+3. `comp.py`: Computes financial metrics (returns, volatility, volume statistics) (**Metrics Calculation**)
 
-- 'main.py': This file contains functions used to calculate the necessary financial metrics for analysis.
+4. `stream.py`: Starts the Streamlit web interface (**Data Visualization**)
 
-- 'webbe.py': This file contains the code that enables the Streamlit web page to function.
+### Launch Dashboard
+   ```
+   streamlit run stream.py
+   ```
+   
 
-## Visualizing Interactive Charts
+## How to Navigate the Financial Landscape
 
-To view the interactive web page, simply run the following command:
+### For Beginners:
+1. Start with **Returns** view to identify growth patterns
+2. Check **Volatility** to understand stability
+3. Observe **Volume** spikes for market activity clues
 
-```
-streamlit run webbe.py
-```
-Customize your experience: Choose the securities that interest you and discover their trends over time.
+### For Advanced Users:
+1. Use scatter plots to analyze risk-return profiles
+2. Compare sector performance through ETF groups
+3. Identify correlation patterns between volume and returns
+
+## License
+[MIT License](LICENSE) - Free for educational and commercial use
+
+---
+
+**Discover market insights today - no finance degree required!**  
+The complex made simple, the exclusive made accessible. Start your financial exploration journey with just one click.

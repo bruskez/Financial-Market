@@ -1,61 +1,137 @@
+import streamlit as st
 import os
 import pandas as pd
-import numpy as np
+import plotly.express as px
+from datetime import datetime
 
-class DataProcessor:
-    def __init__(self, folder_path):
-        self.folder_path = folder_path
+# Configurazione iniziale
+st.set_page_config(page_title="Financial Dashboard", layout="wide")
 
-    def process_file(self, file_path):
-        df = pd.read_csv(file_path)
-        df['Date'] = pd.to_datetime(df['Date'])
-        return df
 
-    def save_to_csv(self, df, file_path):
-        df.to_csv(file_path, index=False)
+# Funzione per caricare e processare i dati
+@st.cache_data
+def load_data(selected_files, selected_folder_path, selected_year):
+    data = pd.DataFrame()
 
-    def calculate_volatility(self, df):
-        monthly_group = df.groupby(df['Date'].dt.to_period("M"))
-        df['volatility'] = np.nan
-        for month_name, month_data in monthly_group:
-            volatility_month = np.sqrt(np.mean((month_data['daily_return'] - month_data['monthly_mean'])**2))
-            df.loc[df['Date'].dt.to_period("M") == month_name, 'volatility'] = volatility_month
-        return df
+    for file in selected_files:
+        try:
+            file_path = os.path.join(selected_folder_path, file)
+            df = pd.read_csv(file_path)
 
-    def calculate_monthly_mean(self, df, column_name):
-        monthly_mean = df.groupby(df['Date'].dt.to_period('M'))[column_name].mean()
-        df['monthly_mean'] = df['Date'].dt.to_period('M').map(monthly_mean)
-        return df
+            # Conversione e filtraggio date
+            df['Date'] = pd.to_datetime(df['Date'])
+            df = df.set_index('Date')
+            df = df.loc[f'{selected_year[0]}-01-01':f'{selected_year[1]}-12-31']
 
-    def calculate_volume_monthly_mean(self, df):
-        vol_monthly_mean = df.groupby(df['Date'].dt.to_period('M'))['Volume'].mean()
-        df['Vol_month_mean'] = df['Date'].dt.to_period('M').map(vol_monthly_mean)
-        return df
+            # Calcolo metriche
+            df['daily_return'] = df['Close'].pct_change() * 100
+            monthly_group = df.resample('ME')  # ME per frequenza mensile (end of month)
 
-    def process_data(self, column_name):
-        for filename in os.listdir(self.folder_path):
-            if filename.endswith(".csv"):
-                file_path = os.path.join(self.folder_path, filename)
-                df = self.process_file(file_path)
-                df['daily_return'] = (df['Adj Close'].shift(0) / df['Adj Close'].shift(1) - 1) * 100
-                df = self.calculate_monthly_mean(df, 'daily_return')
-                df = self.calculate_volatility(df)
-                df = self.calculate_volume_monthly_mean(df)
-                self.save_to_csv(df, file_path)
+            df['monthly_mean'] = monthly_group['daily_return'].transform('mean')
+            df['monthly_volatility'] = monthly_group['daily_return'].transform('std')
+            df['monthly_volume'] = monthly_group['Volume'].transform('mean')
 
-class ETFProcessor(DataProcessor):
-    def __init__(self, folder_path):
-        super().__init__(folder_path)
+            df['File'] = file  # Aggiungi nome file
+            data = pd.concat([data, df])
 
-class STOCKProcessor(DataProcessor):
-    def __init__(self, folder_path):
-        super().__init__(folder_path)
+        except Exception as e:
+            st.warning(f"Error processing {file}: {str(e)}")
 
-if __name__ == "__main__":
-    # Example usage for ETFProcessor
-    etf_processor = ETFProcessor('/Data/etfs')
-    etf_processor.process_data('daily_return')
+    return data
 
-    # Example usage for STOCKProcessor
-    stock_processor = STOCKProcessor('/Data/stocks')
-    stock_processor.process_data('daily_return')
+
+# UI Layout
+st.title("📊 Your First Financial Analysis Dashboard")
+st.markdown("""
+    <style>
+    .small-font { font-size:18px !important; }
+    </style>
+    <p class="small-font">This dashboard provides a visual analysis of financial data, including Returns, Volatility, and Volume for selected securities </p>
+    """, unsafe_allow_html=True)
+
+# Sidebar controls
+with st.sidebar:
+    st.header("Settings")
+    data_folder = "data"
+
+    try:
+        subfolders = [f.name for f in os.scandir(data_folder) if f.is_dir()]
+        selected_folder = st.radio("📂 Instrument Type", subfolders)
+        selected_folder_path = os.path.join(data_folder, selected_folder)
+        files = [f.name for f in os.scandir(selected_folder_path) if f.is_file() and f.name.endswith('.csv')]
+
+        if not files:
+            st.error("No CSV files found in selected folder")
+            st.stop()
+
+        selected_files = st.multiselect("🔍 Select Securities", files)
+
+        if not selected_files:
+            st.warning("Please select at least one security")
+            st.stop()
+
+        start_year, end_year = 2013, datetime.now().year
+        selected_year = st.slider("📅 Time Period", start_year, end_year, (start_year, end_year))
+
+        chart_type = st.selectbox("📈 Analysis Type", [
+            "Returns",
+            "Returns and Volatility",
+            "Volume",
+            "Volatility"
+        ])
+
+    except Exception as e:
+        st.error(f"Initialization error: {str(e)}")
+        st.stop()
+
+# Main content
+try:
+    data = load_data(selected_files, selected_folder_path, selected_year)
+
+    if data.empty:
+        st.warning("No data available for selected period")
+        st.stop()
+
+    # Monthly aggregated data
+    monthly_data = data.groupby(['File', pd.Grouper(freq='ME')]).mean().reset_index()
+
+    # Visualizations
+    col1, col2 = st.columns([3, 1])
+
+    with col1:
+        st.subheader(f"{chart_type} Analysis")
+
+        if chart_type == "Returns":
+            fig = px.line(monthly_data, x='Date', y='monthly_mean', color='File',
+                          labels={'monthly_mean': 'Monthly Return (%)'})
+            fig.update_traces(line_width=2.5)
+
+        elif chart_type == "Returns and Volatility":
+            fig = px.scatter(monthly_data, x='monthly_mean', y='monthly_volatility',
+                             color='File', size='monthly_volume',
+                             labels={'monthly_mean': 'Return (%)',
+                                     'monthly_volatility': 'Volatility'})
+
+        elif chart_type == "Volatility":
+            fig = px.area(monthly_data, x='Date', y='monthly_volatility', color='File',
+                          labels={'monthly_volatility': 'Volatility'})
+
+        elif chart_type == "Volume":
+            fig = px.bar(monthly_data, x='Date', y='monthly_volume', color='File',
+                         labels={'monthly_volume': 'Volume'})
+
+        fig.update_layout(height=500, hovermode='x unified')
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col2:
+        st.subheader("Statistics")
+        st.dataframe(monthly_data.groupby('File').agg({
+            'monthly_mean': ['mean', 'std'],
+            'monthly_volume': 'mean'
+        }).rename(columns={
+            'monthly_mean': 'Return',
+            'monthly_volume': 'Volume'
+        }).style.format("{:.2f}"))
+
+except Exception as e:
+    st.error(f"Processing error: {str(e)}")

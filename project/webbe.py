@@ -34,7 +34,7 @@ def get_file_description(selected_file, symbols_meta_df):
         return "Description not available"
 
 # Path to the "Data" folder
-data_folder = "C:\\Users\\stebr\\DireDSCoding\\dscoding-projects\\stefano.bruschi\\Data"
+data_folder = "C:\\Users\\stebr\\Financial Market\\data"
 
 # Load the 'symbols_valid_meta.csv' file
 symbols_meta_path = "../symbols_valid_meta.csv"

@@ -2,6 +2,12 @@
 import os
 import pandas as pd
 import numpy as np
+import time
+import platform
+import os
+
+start = time.time()
+
 
 # Define a class for processing ETF data
 class ETFProcessor:
@@ -96,7 +102,7 @@ class ETFProcessor:
 # Example of using the ETFProcessor class
 if __name__ == "__main__":
     # Replace 'path_della_tua_cartella' with the actual path to your 'etfs' folder
-    processor = ETFProcessor('C:\\Users\\stebr\\DireDSCoding\\dscoding-projects\\stefano.bruschi\\Data\\etfs')
+    processor = ETFProcessor('C:\\Users\\stebr\\Financial Market\\data\\etfs')
     # Call the methods to process the ETF data
     processor.daily_return_calculation()
     processor.calculate_monthly_mean()
@@ -197,9 +203,20 @@ class STOCKProcessor:
 # Example of using the STOCKProcessor class
 if __name__ == "__main__":
     # Replace 'path_della_tua_cartella' with the actual path to your 'stocks' folder
-    processor = STOCKProcessor('C:\\Users\\stebr\\DireDSCoding\\dscoding-projects\\stefano.bruschi\\Data\\stocks')
+    processor = STOCKProcessor('C:\\Users\\stebr\\Financial Market\\data\\stocks')
     # Call the methods to process the stock data
     processor.daily_return_calculation()
     processor.calculate_monthly_mean()
     processor.calculate_rmse()
     processor.calculate_volume_monthly_mean()
+
+# Per Windows
+if platform.system() == "Windows":
+    import winsound
+    winsound.Beep(1000, 500)  # Frequenza 1000Hz per 500ms
+    os.system('msg * "Script completato!"')  # popup Windows
+
+
+end = time.time()
+
+print(f"Tempo impiegato: {end - start:.2f} secondi")
