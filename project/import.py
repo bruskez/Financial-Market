@@ -1,6 +1,6 @@
 # Configuration parameters
 offset = 0  # Starting index for symbol download
-limit = 30  # Exact number of valid files we want to obtain
+limit = 3000  # Exact number of valid files we want to obtain
 period = '10y'  # Valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
 
 import pandas as pd
